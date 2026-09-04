@@ -1,0 +1,1 @@
+document.write('<script src="lite/p00.js"><\/script><script src="lite/p01.js"><\/script>');
