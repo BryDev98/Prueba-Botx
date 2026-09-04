@@ -1,0 +1,1 @@
+Trigger RANK ZERO web asset build via pull_request event.
