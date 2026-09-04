@@ -7,6 +7,8 @@ on:
       - index.html
       - payload/**
       - .github/workflows/build-rank-zero-web.yml
+  pull_request:
+    branches: [rank-zero-web-preview]
   workflow_dispatch:
 
 permissions:
