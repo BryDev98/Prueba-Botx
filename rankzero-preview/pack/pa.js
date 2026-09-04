@@ -1,1 +1,1 @@
-document.write('<script src="lite/p00.js"><\/script><script src="lite/p01.js"><\/script>');
+document.write('<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"><\/script><script src="compat-gzip.js"><\/script><script src="lite/p00.js"><\/script><script src="lite/p01.js"><\/script>');
