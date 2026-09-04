@@ -1,0 +1,62 @@
+name: Build RANK ZERO Web Assets
+
+on:
+  push:
+    branches: [rank-zero-web-preview]
+    paths:
+      - index.html
+      - payload/**
+      - .github/workflows/build-rank-zero-web.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rank-zero-web-preview
+
+      - name: Restore web and generator sources
+        run: |
+          gzip -dc payload/styles.css.gz > styles.css
+          gzip -dc payload/main.js.gz > main.js
+          gzip -dc payload/generate_assets.py.gz > generate_assets.py
+          gzip -dc payload/upgrade_sculpts.py.gz > upgrade_sculpts.py
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install asset pipeline
+        run: pip install numpy pillow trimesh scikit-image
+
+      - name: Generate base meshes and PBR textures
+        run: python generate_assets.py
+
+      - name: Upgrade hero sculpts
+        run: python upgrade_sculpts.py
+
+      - name: Optimize preview textures
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          for p in Path('assets/textures').glob('*.png'):
+              im = Image.open(p)
+              if max(im.size) > 512:
+                  im = im.resize((512, 512), Image.Resampling.LANCZOS)
+                  im.save(p, optimize=True)
+          PY
+
+      - name: Commit generated runtime
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add styles.css main.js generate_assets.py upgrade_sculpts.py assets
+          git diff --cached --quiet && exit 0
+          git commit -m "build(web): generate RANK ZERO 3D runtime"
+          git push origin HEAD:rank-zero-web-preview
